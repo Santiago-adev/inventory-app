@@ -76,7 +76,7 @@ async function page({ params }: { params: { productId: string } }) {
           <div>
             <div className="flex items-center gap-x-2">
               <IconBadge icon={LayoutDashboard} />
-              <h2 className="text-xl">Customize your course</h2>
+              <h2 className="text-xl">Customize your Product</h2>
             </div>
 
             <NombreFrom  initialData={product} productId={product.id} />

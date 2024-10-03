@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "cockroachdb"
+  url      = env("DATABASE_URL")
+}
+
+model Producto {
+  id             String       @id @default(uuid())
+  userId         String
+  nombre         String
+  referencia     String?
+  serial         String?
+  marca          String?
+  estado         Estado?
+  propietario    Propietario? @relation(fields: [propietarioId], references: [id])
+  detalle        String?
+  isPublished    Boolean      @default(false)
+  disponibilidad String?
+  ubicacion      String?
+  imagenUrl      String?
+  Category       Category?    @relation(fields: [categoryId], references: [id])
+  categoryId     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  propietarioId String?
+}
+
+model Propietario {
+  id     String @id @default(uuid())
+  nombre String
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  Producto  Producto[]
+}
+
+enum Estado {
+  bueno
+  malo
+  regular
+}
+
+model Category {
+  id          String        @id @default(uuid())
+  name        String        @unique
+  Producto    Producto[]
+  SubCategory SubCategory[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SubCategory {
+  id         String   @id @default(uuid())
+  name       String   @unique
+  Category   Category @relation(fields: [categoryId], references: [id])
+  categoryId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}

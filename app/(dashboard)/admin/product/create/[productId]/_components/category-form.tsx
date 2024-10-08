@@ -1,12 +1,9 @@
-"use client";
-
+"use client"
 import * as z from "zod";
-import React from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
 import {
@@ -18,66 +15,79 @@ import {
 } from "@/components/ui/form";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { cn } from "@/lib/utils";
+import React from "react";
+import { Producto } from "@prisma/client";
+import { Combobox } from "@/components/ui/combobox";
 
-interface NombreFromProps {
-  initialData: {
-    nombre: string;
-  };
+interface CategoryFormProps {
+  initialData: Producto;
   productId: string;
+  options: { label: string; value: string }[];
 }
 
-const formShema = z.object({
-  nombre: z
-    .string()
-    .min(1, {
-      message: "nombre is required",
-    })
-    .max(150, {
-      message: "very long message",
-    }),
+const formSchema = z.object({
+  categoryId: z.string().min(1),
 });
 
-const NombreFrom = ({ initialData, productId }: NombreFromProps) => {
+const CategoryForm = ({
+  initialData,
+  productId,
+  options=[],
+}: CategoryFormProps) => {
   const router = useRouter();
-
   const [isEditing, setIsEditing] = useState(false);
 
-  const toggleEdit = () => setIsEditing(!isEditing);
+  const toggleEdit = () => setIsEditing((prev) => !prev);
 
-  const form = useForm<z.infer<typeof formShema>>({
-    resolver: zodResolver(formShema),
-    defaultValues: initialData,
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      categoryId: initialData?.categoryId || "",
+    },
   });
 
   const { isSubmitting, isValid } = form.formState;
 
-  const onSubmit = async (values: z.infer<typeof formShema>) => {
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      {await axios.patch(`/api/courses/${productId}`, values);}
-      toast.success("Course");
+      await axios.patch(`/api/product/${productId}`, values);
+      toast.success("Category updated successfully");
       toggleEdit();
       router.refresh();
     } catch (error) {
-      toast.error("Something webt wrong");
+      toast.error("Something went wrong");
     }
   };
+
+  const selectedOption = options.find(
+    (option) => option.value === initialData.categoryId
+  );
+
   return (
     <div className="mt-6 border bg-slate-100 rounded-md p-4">
       <div className="font-medium flex items-center justify-between">
-        Name owner
-        <Button variant={"ghost"} onClick={toggleEdit}>
+        Course Category
+        <Button variant="ghost" onClick={toggleEdit}>
           {isEditing ? (
             <>Cancel</>
           ) : (
             <>
               <Pencil className="h-4 w-4 mr-2 " />
-              Edit Name
+              Edit Category
             </>
           )}
         </Button>
       </div>
       {!isEditing ? (
-        <p className="text-sm mt-2">{initialData.nombre}</p>
+        <p
+          className={cn(
+            "text-sm mt-2",
+            !initialData.categoryId && "text-slate-500 italic"
+          )}
+        >
+          {selectedOption?.label || "No category"}
+        </p>
       ) : (
         <Form {...form}>
           <form
@@ -86,15 +96,11 @@ const NombreFrom = ({ initialData, productId }: NombreFromProps) => {
           >
             <FormField
               control={form.control}
-              name="nombre"
+              name="categoryId"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input
-                      disabled={isSubmitting}
-                      placeholder="e.g 'Advanced web development'"
-                      {...field}
-                    />
+                    <Combobox options={options} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -112,10 +118,4 @@ const NombreFrom = ({ initialData, productId }: NombreFromProps) => {
   );
 };
 
-export default NombreFrom;
-
-
-
-
-
-
+export default CategoryForm;

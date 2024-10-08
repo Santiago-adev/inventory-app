@@ -47,7 +47,7 @@ const CreatePage = () => {
       const response = await axios.post("/api/product", values);
       router.push(`/admin/product/create/${response.data.id}`);
       toast.success("Course created");
-    } catch {
+    } catch (error) {
       toast.error("Something webt wrong");
     }
   };

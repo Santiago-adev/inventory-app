@@ -12,6 +12,7 @@ import {
   ListChecks,
 } from "lucide-react";
 import NombreFrom from "./_components/NombreForm";
+import CategoryForm from "./_components/category-form";
 
 async function page({ params }: { params: { productId: string } }) {
   const { userId } = auth();
@@ -27,11 +28,10 @@ async function page({ params }: { params: { productId: string } }) {
     },
   });
 
-  const Categories = await db.category.findMany({
-    orderBy: {
-      name: "asc",
-    },
-  });
+  const Categories = await db.category.findMany();
+
+
+
 
   if (!product) {
     return redirect("/");
@@ -52,6 +52,9 @@ async function page({ params }: { params: { productId: string } }) {
   const completionText = `(${completedFields}/${totalFields})`;
 
   const isComplete = requiredFields.every(Boolean);
+
+
+  console.log(Categories);
 
   return (
     <>
@@ -79,18 +82,20 @@ async function page({ params }: { params: { productId: string } }) {
               <h2 className="text-xl">Customize your Product</h2>
             </div>
 
-            <NombreFrom  initialData={product} productId={product.id} />
-            {/* <TittleForm initialData={course} courseId={course.id} />
+            <NombreFrom initialData={product} productId={product.id} />
+            {
+              /* <TittleForm initialData={course} courseId={course.id} />
             <DescriptionFrom initialData={course} courseId={course.id} />
-            <ImageForm initialData={course} courseId={course.id} />
-            <CategoryForm
-              initialData={course}
-              courseId={course.id}
-              options={categories.map((category) => ({
-                label: category.name,
-                value: category.id,
-              }))}
-            /> */}
+            <ImageForm initialData={course} courseId={course.id} />*/
+              <CategoryForm
+                initialData={product}
+                productId={product.id}
+                options={Categories.map((category) => ({
+                  label: category.name,
+                  value: category.id,
+                }))}
+              />
+            }
           </div>
         </div>
       </div>
